@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
-using ClickHouse.Ado.Impl.Data;
-
-namespace ClickHouse.Ado.Impl
+﻿namespace ClickHouse.Ado.Impl
 {
+    using System.Collections.Generic;
+    using Data;
+
     internal class Response
     {
-        public List<Block> Blocks { get; private set; } = new List<Block>();
+        public List<Block> Blocks { get; } = new List<Block>();
+
         public void AddBlock(Block block)
         {
             Blocks.Add(block);
@@ -13,12 +14,10 @@ namespace ClickHouse.Ado.Impl
 
         public void OnProgress(long rows, long total, long bytes)
         {
-            
         }
 
         public void OnEnd()
         {
-            
         }
     }
 }

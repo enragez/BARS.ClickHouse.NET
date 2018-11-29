@@ -1,9 +1,14 @@
-﻿using System;
-
-namespace ClickHouse.Ado
+﻿namespace ClickHouse.Ado
 {
+    using System;
+
     public class ClickHouseException : Exception
     {
+        public int Code;
+
+        public string Name;
+        public string ServerStackTrace;
+
         public ClickHouseException()
         {
         }
@@ -15,9 +20,5 @@ namespace ClickHouse.Ado
         public ClickHouseException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
-        public string Name;
-        public int Code;
-        public string ServerStackTrace;
     }
 }

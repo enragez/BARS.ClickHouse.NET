@@ -1,10 +1,9 @@
-﻿using System;
-
-namespace ClickHouse.Ado.Impl.Compress
+﻿namespace ClickHouse.Ado.Impl.Compress
 {
+    using System;
+
     internal struct UInt128 : IEquatable<UInt128>
     {
-
         public UInt128(ulong low, ulong high)
             : this()
         {
@@ -24,7 +23,11 @@ namespace ClickHouse.Ado.Impl.Compress
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
             return obj is UInt128 && Equals((UInt128) obj);
         }
 
@@ -32,7 +35,7 @@ namespace ClickHouse.Ado.Impl.Compress
         {
             unchecked
             {
-                return (Low.GetHashCode()*397) ^ High.GetHashCode();
+                return (Low.GetHashCode() * 397) ^ High.GetHashCode();
             }
         }
     }

@@ -1,18 +1,14 @@
-﻿#pragma warning disable CS0618
-
-using System;
-using System.Collections;
-#if !NETCOREAPP11
-using System.Data;
-#endif
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using ClickHouse.Ado.Impl.ATG.Insert;
-using Buffer = System.Buffer;
-
-namespace ClickHouse.Ado.Impl.ColumnTypes
+﻿namespace ClickHouse.Ado.Impl.ColumnTypes
 {
+    using System;
+    using System.Collections;
+    using System.Data;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.Linq;
+    using ATG.Insert;
+    using Buffer = System.Buffer;
+
     internal class DateColumnType : ColumnType
     {
         private static readonly DateTime UnixTimeBase = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -28,6 +24,10 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
 
         public DateTime[] Data { get; protected set; }
 
+        public override int Rows => Data?.Length ?? 0;
+
+        internal override Type CLRType => typeof(DateTime);
+
         internal override void Read(ProtocolFormatter formatter, int rows)
         {
             var itemSize = sizeof(ushort);
@@ -36,9 +36,6 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
             Buffer.BlockCopy(bytes, 0, xdata, 0, itemSize * rows);
             Data = xdata.Select(x => UnixTimeBase.AddDays(x)).ToArray();
         }
-
-        public override int Rows => Data?.Length ?? 0;
-        internal override Type CLRType => typeof(DateTime);
 
 
         public override string AsClickHouseType()
@@ -50,25 +47,40 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
         {
             Debug.Assert(Rows == rows, "Row count mismatch!");
             foreach (var d in Data)
-                formatter.WriteBytes(BitConverter.GetBytes((ushort) ((d - UnixTimeBase).TotalDays)));
+            {
+                formatter.WriteBytes(BitConverter.GetBytes((ushort) (d - UnixTimeBase).TotalDays));
+            }
         }
 
         public override void ValueFromConst(Parser.ValueType val)
         {
-            if (val.TypeHint == Parser.ConstType.String)
-                Data = new[] {DateTime.ParseExact(ProtocolFormatter.UnescapeStringValue(val.StringValue), "yyyy-MM-dd", null, DateTimeStyles.AssumeUniversal)};
-            else
-                throw new InvalidCastException("Cannot convert numeric value to Date.");
+            switch (val.TypeHint)
+            {
+                case Parser.ConstType.String:
+                    Data = new[]
+                           {
+                               DateTime.ParseExact(ProtocolFormatter.UnescapeStringValue(val.StringValue),
+                                                   "yyyy-MM-dd", null, DateTimeStyles.AssumeUniversal)
+                           };
+                    break;
+                default:
+                    throw new InvalidCastException("Cannot convert numeric value to Date.");
+            }
         }
 
         public override void ValueFromParam(ClickHouseParameter parameter)
         {
-            if (parameter.DbType == DbType.Date || parameter.DbType == DbType.DateTime || 
-                parameter.DbType == DbType.DateTime2 || parameter.DbType == DbType.DateTimeOffset)
+            switch (parameter.DbType)
             {
-                Data = new[] {(DateTime) Convert.ChangeType(parameter.Value, typeof(DateTime))};
+                case DbType.Date:
+                case DbType.DateTime:
+                case DbType.DateTime2:
+                case DbType.DateTimeOffset:
+                    Data = new[] {(DateTime) Convert.ChangeType(parameter.Value, typeof(DateTime))};
+                    break;
+                default:
+                    throw new InvalidCastException($"Cannot convert parameter with type {parameter.DbType} to Date.");
             }
-            else throw new InvalidCastException($"Cannot convert parameter with type {parameter.DbType} to Date.");
         }
 
         public override object Value(int currentRow)

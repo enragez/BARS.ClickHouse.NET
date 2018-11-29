@@ -1,11 +1,12 @@
-﻿using System;
-using System.IO;
-using ClickHouse.Ado.Impl.Data;
-
-namespace ClickHouse.Ado.Impl.Compress
+﻿namespace ClickHouse.Ado.Impl.Compress
 {
-    abstract class Compressor
+    using System;
+    using System.IO;
+    using Data;
+
+    internal abstract class Compressor
     {
+        public abstract CompressionMethod Method { get; }
         public abstract Stream BeginCompression(Stream baseStream);
         public abstract void EndCompression();
         public abstract Stream BeginDecompression(Stream baseStream);
@@ -13,11 +14,11 @@ namespace ClickHouse.Ado.Impl.Compress
 
         public static Compressor Create(ClickHouseConnectionSettings settings)
         {
-            switch ((settings.Compressor??"").ToLower())
+            switch ((settings.Compressor ?? "").ToLower())
             {
                 case "zstd":
                     throw new NotImplementedException();
-                    //Actually server doesn't interpret this well. Maybe ZSTD implementation is slightly different?
+                //Actually server doesn't interpret this well. Maybe ZSTD implementation is slightly different?
 #if false
                     return new ZstdCompressor();
 #endif
@@ -30,7 +31,5 @@ namespace ClickHouse.Ado.Impl.Compress
                     return new Lz4Compressor(false, settings);
             }
         }
-
-        public abstract CompressionMethod Method { get; }
     }
 }

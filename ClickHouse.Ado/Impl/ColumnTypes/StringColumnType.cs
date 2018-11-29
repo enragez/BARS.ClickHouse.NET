@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Diagnostics;
-using System.Linq;
-using ClickHouse.Ado.Impl.ATG.Insert;
-
-namespace ClickHouse.Ado.Impl.ColumnTypes
+﻿namespace ClickHouse.Ado.Impl.ColumnTypes
 {
+    using System;
+    using System.Collections;
+    using System.Diagnostics;
+    using System.Linq;
+    using ATG.Insert;
+
     internal class StringColumnType : ColumnType
     {
         public StringColumnType()
@@ -19,17 +19,18 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
 
         public string[] Data { get; private set; }
 
+        public override int Rows => Data?.Length ?? 0;
+
+        internal override Type CLRType => typeof(string);
+
         internal override void Read(ProtocolFormatter formatter, int rows)
         {
-            Data=new string[rows];
+            Data = new string[rows];
             for (var i = 0; i < rows; i++)
             {
                 Data[i] = formatter.ReadString();
             }
         }
-
-        public override int Rows => Data?.Length ?? 0;
-        internal override Type CLRType => typeof(string);
 
         public override string AsClickHouseType()
         {
@@ -50,14 +51,17 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
             if (val.TypeHint == Parser.ConstType.String)
             {
                 var uvalue = ProtocolFormatter.UnescapeStringValue(val.StringValue);
-                Data = new[] { uvalue };
+                Data = new[] {uvalue};
             }
             else
-                Data = new[] { val.StringValue };
+            {
+                Data = new[] {val.StringValue};
+            }
         }
+
         public override void ValueFromParam(ClickHouseParameter parameter)
         {
-            Data = new[] { parameter.Value?.ToString() };
+            Data = new[] {parameter.Value?.ToString()};
         }
 
         public override object Value(int currentRow)

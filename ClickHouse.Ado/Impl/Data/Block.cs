@@ -1,21 +1,26 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace ClickHouse.Ado.Impl.Data
+﻿namespace ClickHouse.Ado.Impl.Data
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
     internal class Block
     {
         public string Name { get; set; } = "";
-        public BlockInfo BlockInfo { get; set; }=new BlockInfo();
+
+        public BlockInfo BlockInfo { get; set; } = new BlockInfo();
 
         public int Rows => Columns.Count > 0 ? Columns.First().Type.Rows : 0;
 
-        public List<ColumnInfo> Columns { get; }=new List<ColumnInfo>();
+        public List<ColumnInfo> Columns { get; } = new List<ColumnInfo>();
+
         internal void Write(ProtocolFormatter formatter)
         {
-            formatter.WriteUInt((int)ClientMessageType.Data);
+            formatter.WriteUInt((int) ClientMessageType.Data);
             if (formatter.ServerInfo.Build >= ProtocolCaps.DbmsMinRevisionWithTemporaryTables)
+            {
                 formatter.WriteString(Name);
+            }
+
             using (formatter.Compression)
             {
                 if (formatter.ClientInfo.ClientRevision >= ProtocolCaps.DbmsMinRevisionWithBlockInfo)
@@ -37,11 +42,16 @@ namespace ClickHouse.Ado.Impl.Data
         {
             var rv = new Block();
             if (formatter.ServerInfo.Build >= ProtocolCaps.DbmsMinRevisionWithTemporaryTables)
+            {
                 formatter.ReadString();
+            }
+
             using (formatter.Decompression)
             {
                 if (formatter.ServerInfo.Build >= ProtocolCaps.DbmsMinRevisionWithBlockInfo)
+                {
                     rv.BlockInfo = BlockInfo.Read(formatter);
+                }
 
                 var cols = formatter.ReadUInt();
                 var rows = formatter.ReadUInt();
@@ -50,6 +60,7 @@ namespace ClickHouse.Ado.Impl.Data
                     rv.Columns.Add(ColumnInfo.Read(formatter, (int) rows));
                 }
             }
+
             return rv;
         }
     }

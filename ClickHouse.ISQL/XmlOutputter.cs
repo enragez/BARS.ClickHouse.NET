@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Xml;
-
-namespace ClickHouse.Isql
+﻿namespace ClickHouse.Isql
 {
-    class XmlOutputter:Outputter
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
+    using System.Xml;
+
+    internal class XmlOutputter : Outputter
     {
-        private XmlTextWriter writer;
-        private List<string> names;
+        private readonly XmlTextWriter writer;
         private int cell;
+        private List<string> names;
 
 
         public XmlOutputter(Stream s)
@@ -59,7 +59,7 @@ namespace ClickHouse.Isql
         public override void ValueCell(object value)
         {
             writer.WriteStartElement(names[cell++]);
-            writer.WriteValue(value?.ToString()??"");
+            writer.WriteValue(value?.ToString() ?? "");
             writer.WriteEndElement();
         }
 

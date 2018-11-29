@@ -4,7 +4,8 @@
     {
         TSV,
         TSVWithHeader,
-        XML,
+
+        XML
         //JSON
     }
 }

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Globalization;
-
-namespace ClickHouse.Ado.Impl.Settings
+﻿namespace ClickHouse.Ado.Impl.Settings
 {
+    using System;
+    using System.Globalization;
+
     internal class FloatSettingValue : SettingValue
     {
         public FloatSettingValue(float value)
@@ -20,8 +20,12 @@ namespace ClickHouse.Ado.Impl.Settings
 
         internal override T As<T>()
         {
-            if (typeof(T) != typeof(float)) throw new InvalidCastException();
-            return (T)(object)Value;
+            if (typeof(T) != typeof(float))
+            {
+                throw new InvalidCastException();
+            }
+
+            return (T) (object) Value;
         }
 
         internal override object AsValue()

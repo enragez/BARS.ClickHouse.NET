@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace ClickHouse.Ado.Impl.Data
+﻿namespace ClickHouse.Ado.Impl.Data
 {
+    using System;
+
     internal class BlockInfo
     {
         public bool IsOwerflow { get; private set; }
@@ -19,8 +19,8 @@ namespace ClickHouse.Ado.Impl.Data
         public static BlockInfo Read(ProtocolFormatter formatter)
         {
             long fieldNum;
-            var rv=new BlockInfo();
-            
+            var rv = new BlockInfo();
+
             while ((fieldNum = formatter.ReadUInt()) != 0)
             {
                 switch (fieldNum)
@@ -35,6 +35,7 @@ namespace ClickHouse.Ado.Impl.Data
                         throw new InvalidOperationException("Unknown field number {0} in block info.");
                 }
             }
+
             return rv;
         }
     }

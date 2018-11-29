@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Diagnostics;
-using ClickHouse.Ado.Impl.ATG.Insert;
-
-namespace ClickHouse.Ado.Impl.ColumnTypes
+﻿namespace ClickHouse.Ado.Impl.ColumnTypes
 {
-    internal class NullColumnType:ColumnType {
+    using System;
+    using System.Collections;
+    using System.Diagnostics;
+    using ATG.Insert;
+
+    internal class NullColumnType : ColumnType
+    {
         private int _rows;
+
+        public override int Rows => _rows;
+
+        internal override Type CLRType => typeof(object);
 
         internal override void Read(ProtocolFormatter formatter, int rows)
         {
@@ -14,12 +19,8 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
             _rows = rows;
         }
 
-        public override int Rows => _rows;
-        internal override Type CLRType => typeof(object);
-
         public override void ValueFromConst(Parser.ValueType val)
         {
-            
         }
 
         public override string AsClickHouseType()
@@ -35,7 +36,6 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
 
         public override void ValueFromParam(ClickHouseParameter parameter)
         {
-            
         }
 
         public override object Value(int currentRow)
@@ -50,7 +50,6 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
 
         public override void ValuesFromConst(IEnumerable objects)
         {
-            
         }
     }
 }

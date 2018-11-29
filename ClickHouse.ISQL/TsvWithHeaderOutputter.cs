@@ -1,10 +1,14 @@
-﻿using System;
-using System.IO;
-
-namespace ClickHouse.Isql
+﻿namespace ClickHouse.Isql
 {
-    class TsvWithHeaderOutputter : TsvOutputter
+    using System;
+    using System.IO;
+
+    internal class TsvWithHeaderOutputter : TsvOutputter
     {
+        public TsvWithHeaderOutputter(Stream s) : base(s)
+        {
+        }
+
         public override void HeaderCell(string name)
         {
             Console.Write(name);
@@ -14,10 +18,6 @@ namespace ClickHouse.Isql
         public override void DataStart()
         {
             Console.WriteLine("\n--------------------------------------------------------");
-        }
-
-        public TsvWithHeaderOutputter(Stream s) : base(s)
-        {
         }
     }
 }

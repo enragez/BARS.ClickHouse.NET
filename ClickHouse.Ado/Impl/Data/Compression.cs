@@ -3,6 +3,6 @@
     internal enum Compression
     {
         Disable = 0,
-        Enable = 1,
+        Enable = 1
     }
 }

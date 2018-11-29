@@ -1,18 +1,14 @@
-﻿#pragma warning disable CS0618
-
-using System;
-using System.Collections;
-#if !NETCOREAPP11
-using System.Data;
-#endif
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using ClickHouse.Ado.Impl.ATG.Insert;
-using Buffer = System.Buffer;
-
-namespace ClickHouse.Ado.Impl.ColumnTypes
+﻿namespace ClickHouse.Ado.Impl.ColumnTypes
 {
+    using System;
+    using System.Collections;
+    using System.Data;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Runtime.InteropServices;
+    using ATG.Insert;
+    using Buffer = System.Buffer;
+
     internal class SimpleColumnType<T> : ColumnType
     {
         public SimpleColumnType()
@@ -26,6 +22,10 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
 
         public T[] Data { get; private set; }
 
+        public override int Rows => Data?.Length ?? 0;
+
+        internal override Type CLRType => typeof(T);
+
         internal override void Read(ProtocolFormatter formatter, int rows)
         {
             var itemSize = Marshal.SizeOf(typeof(T));
@@ -34,19 +34,27 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
             Buffer.BlockCopy(bytes, 0, Data, 0, itemSize * rows);
         }
 
-        public override int Rows => Data?.Length ?? 0;
-        internal override Type CLRType => typeof(T);
-
         public override string AsClickHouseType()
         {
             if (typeof(T) == typeof(double))
+            {
                 return "Float64";
+            }
+
             if (typeof(T) == typeof(float))
+            {
                 return "Float32";
+            }
+
             if (typeof(T) == typeof(byte))
+            {
                 return "UInt8";
+            }
+
             if (typeof(T) == typeof(sbyte))
+            {
                 return "Int8";
+            }
 
             return typeof(T).Name;
         }
@@ -62,12 +70,21 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
 
         public override void ValueFromConst(Parser.ValueType val)
         {
-            if (val.TypeHint == Parser.ConstType.String)
-                Data = new[] {(T) Convert.ChangeType(ProtocolFormatter.UnescapeStringValue(val.StringValue), typeof(T))};
-            else if (val.TypeHint == Parser.ConstType.Number)
-                Data = new[] {(T) Convert.ChangeType(val.StringValue, typeof(T))};
-            else
-                throw new NotSupportedException();
+            switch (val.TypeHint)
+            {
+                case Parser.ConstType.String:
+                    Data = new[]
+                           {
+                               (T) Convert.ChangeType(ProtocolFormatter.UnescapeStringValue(val.StringValue),
+                                                      typeof(T))
+                           };
+                    break;
+                case Parser.ConstType.Number:
+                    Data = new[] {(T) Convert.ChangeType(val.StringValue, typeof(T))};
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
         public override void ValueFromParam(ClickHouseParameter parameter)
@@ -86,7 +103,8 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
                     Data = new[] {(T) Convert.ChangeType(parameter.Value, typeof(T))};
                     break;
                 default:
-                    throw new InvalidCastException($"Cannot convert parameter with type {parameter.DbType} to {typeof(T).Name}.");
+                    throw new
+                        InvalidCastException($"Cannot convert parameter with type {parameter.DbType} to {typeof(T).Name}.");
             }
         }
 

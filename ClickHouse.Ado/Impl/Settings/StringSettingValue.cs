@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace ClickHouse.Ado.Impl.Settings
+﻿namespace ClickHouse.Ado.Impl.Settings
 {
+    using System;
+
     internal class StringSettingValue : SettingValue
     {
         public StringSettingValue(string value)
@@ -19,8 +19,12 @@ namespace ClickHouse.Ado.Impl.Settings
 
         internal override T As<T>()
         {
-            if (typeof(T) != typeof(string)) throw new InvalidCastException();
-            return (T)(object)Value;
+            if (typeof(T) != typeof(string))
+            {
+                throw new InvalidCastException();
+            }
+
+            return (T) (object) Value;
         }
 
         internal override object AsValue()

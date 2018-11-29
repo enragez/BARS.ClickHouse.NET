@@ -1,12 +1,14 @@
-using System;
-using System.IO;
-
 namespace ClickHouse.Ado.Impl.Compress
 {
-    abstract class HashingCompressor : Compressor
+    using System;
+    using System.IO;
+
+    internal abstract class HashingCompressor : Compressor
     {
         private readonly ClickHouseConnectionSettings _settings;
+
         private Stream _baseStream;
+
         private MemoryStream _uncompressed;
 
         protected HashingCompressor(ClickHouseConnectionSettings settings)
@@ -17,7 +19,7 @@ namespace ClickHouse.Ado.Impl.Compress
         public override Stream BeginCompression(Stream baseStream)
         {
             _baseStream = baseStream;
-            return _uncompressed=new MemoryStream();
+            return _uncompressed = new MemoryStream();
         }
 
         public override void EndCompression()
@@ -32,29 +34,39 @@ namespace ClickHouse.Ado.Impl.Compress
         public override Stream BeginDecompression(Stream baseStream)
         {
             return new ChunkedStream(() =>
-            {
-                _baseStream = baseStream;
-                var hashRead = new byte[16];
-                int read = 0;
-                do
-                {
-                    read += baseStream.Read(hashRead, read, 16 - read);
-                } while (read < 16);
+                                     {
+                                         _baseStream = baseStream;
+                                         var hashRead = new byte[16];
+                                         var read = 0;
+                                         do
+                                         {
+                                             read += baseStream.Read(hashRead, read, 16 - read);
+                                         } while (read < 16);
 
-                var bytes = Decompress(baseStream, out var hash);
-                
-                if (_settings.CheckCompressedHash && BitConverter.ToUInt64(hashRead, 0) != hash.Low)
-                    throw new ClickHouseException("Checksum verification failed.");
-                if (_settings.CheckCompressedHash && BitConverter.ToUInt64(hashRead, 8) != hash.High)
-                    throw new ClickHouseException("Checksum verification failed.");
+                                         var bytes = Decompress(baseStream, out var hash);
 
-                return bytes;
-            });
+                                         if (_settings.CheckCompressedHash &&
+                                             BitConverter.ToUInt64(hashRead, 0) != hash.Low)
+                                         {
+                                             throw new ClickHouseException("Checksum verification failed.");
+                                         }
+
+                                         if (_settings.CheckCompressedHash &&
+                                             BitConverter.ToUInt64(hashRead, 8) != hash.High)
+                                         {
+                                             throw new ClickHouseException("Checksum verification failed.");
+                                         }
+
+                                         return bytes;
+                                     });
         }
+
         public override void EndDecompression()
         {
         }
+
         protected abstract byte[] Compress(MemoryStream uncompressed);
+
         protected abstract byte[] Decompress(Stream compressed, out UInt128 compressedHash);
     }
 }

@@ -3,6 +3,6 @@
     public class ServerInfo
     {
         public long Major, Minor, Build;
-        public string Name,Timezone;
+        public string Name, Timezone;
     }
 }

@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace ClickHouse.Ado.Impl.Settings
+﻿namespace ClickHouse.Ado.Impl.Settings
 {
+    using System;
+
     internal class TimeSpanMsSettingValue : TimeSpanSettingValue
     {
         public TimeSpanMsSettingValue(int milliseconds) : base(TimeSpan.FromMilliseconds(milliseconds))
@@ -14,7 +14,7 @@ namespace ClickHouse.Ado.Impl.Settings
 
         protected internal override void Write(ProtocolFormatter formatter)
         {
-            formatter.WriteUInt((long)Value.TotalMilliseconds);
+            formatter.WriteUInt((long) Value.TotalMilliseconds);
         }
     }
 }

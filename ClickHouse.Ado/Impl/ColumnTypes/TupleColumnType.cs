@@ -1,30 +1,32 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using ClickHouse.Ado.Impl.ATG.Insert;
-
-namespace ClickHouse.Ado.Impl.ColumnTypes
+﻿namespace ClickHouse.Ado.Impl.ColumnTypes
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using ATG.Insert;
+
     internal class TupleColumnType : ColumnType
     {
-
         public TupleColumnType(IEnumerable<ColumnType> values)
         {
             Columns = values.ToArray();
         }
-        public ColumnType[] Columns { get; private set; }
+
+        public ColumnType[] Columns { get; }
+
+        public override int Rows => Columns.First().Rows;
+
+        internal override Type CLRType => typeof(Tuple<>).MakeGenericType(Columns.Select(x => x.CLRType).ToArray());
 
         internal override void Read(ProtocolFormatter formatter, int rows)
         {
             foreach (var column in Columns)
+            {
                 column.Read(formatter, rows);
+            }
         }
-
-        public override int Rows => Columns.First().Rows;
-        internal override Type CLRType => typeof(Tuple<>).MakeGenericType(Columns.Select(x => x.CLRType).ToArray());
-
 
         public override string AsClickHouseType()
         {

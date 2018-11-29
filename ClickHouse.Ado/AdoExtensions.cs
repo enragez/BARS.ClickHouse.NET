@@ -1,18 +1,11 @@
-﻿using System;
-#if !NETCOREAPP11
-using System.Data;
-#endif
-
-namespace ClickHouse.Ado
+﻿namespace ClickHouse.Ado
 {
+    using System;
+    using System.Data;
+
     public static class AdoExtensions
     {
-        public static void ReadAll<T>(this T reader, Action<T> rowAction) where T:
-#if NETCOREAPP11
-            ClickHouseDataReader
-#else
-            IDataReader
-#endif
+        public static void ReadAll<T>(this T reader, Action<T> rowAction) where T : IDataReader
         {
             do
             {
@@ -23,24 +16,17 @@ namespace ClickHouse.Ado
             } while (reader.NextResult());
         }
 
-#if NETCOREAPP11
-        public static ClickHouseCommand AddParameter(this ClickHouseCommand cmd, string name, DbType type, object value) 
-#else
         public static T AddParameter<T>(this T cmd, string name, DbType type, object value) where T : IDbCommand
-#endif
         {
-            var par=cmd.CreateParameter();
+            var par = cmd.CreateParameter();
             par.ParameterName = name;
             par.DbType = type;
             par.Value = value;
             cmd.Parameters.Add(par);
             return cmd;
         }
-#if NETCOREAPP11
-        public static ClickHouseCommand AddParameter(this ClickHouseCommand cmd, string name, object value) 
-#else
+
         public static T AddParameter<T>(this T cmd, string name, object value) where T : IDbCommand
-#endif
         {
             var par = cmd.CreateParameter();
             par.ParameterName = name;

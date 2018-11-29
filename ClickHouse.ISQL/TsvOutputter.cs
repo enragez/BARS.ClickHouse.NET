@@ -1,16 +1,16 @@
-﻿using System;
-using System.IO;
-using System.Text;
-
-namespace ClickHouse.Isql
+﻿namespace ClickHouse.Isql
 {
-    class TsvOutputter : Outputter
+    using System;
+    using System.IO;
+    using System.Text;
+
+    internal class TsvOutputter : Outputter
     {
         private TextWriter writer;
 
         public TsvOutputter(Stream s)
         {
-            writer = new StreamWriter(s,Encoding.UTF8);
+            writer = new StreamWriter(s, Encoding.UTF8);
         }
 
         public override void ResultStart()
@@ -42,7 +42,6 @@ namespace ClickHouse.Isql
 
         public override void DataStart()
         {
-            
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using ClickHouse.Ado.Impl.ATG.Insert;
-
-namespace ClickHouse.Ado.Impl.ColumnTypes
+﻿namespace ClickHouse.Ado.Impl.ColumnTypes
 {
+    using System;
+    using System.Collections;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Text;
+    using ATG.Insert;
+
     internal class FixedStringColumnType : ColumnType
     {
         public FixedStringColumnType(uint length)
@@ -14,18 +14,23 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
             Length = length;
         }
 
-        public uint Length { get; private set; }
+        public uint Length { get; }
+
         public string[] Data { get; private set; }
+
+        public override int Rows => Data?.Length ?? 0;
+
+        internal override Type CLRType => typeof(string);
+
         internal override void Read(ProtocolFormatter formatter, int rows)
         {
             Data = new string[rows];
-            var bytes = formatter.ReadBytes((int)(rows * Length));
+            var bytes = formatter.ReadBytes((int) (rows * Length));
             for (var i = 0; i < rows; i++)
-                Data[i] = Encoding.UTF8.GetString(bytes, (int) (i*Length), (int) Length);
+            {
+                Data[i] = Encoding.UTF8.GetString(bytes, (int) (i * Length), (int) Length);
+            }
         }
-
-        public override int Rows => Data?.Length ?? 0;
-        internal override Type CLRType => typeof(string);
 
         public override string AsClickHouseType()
         {
@@ -39,29 +44,37 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
             {
                 var bytes = Encoding.UTF8.GetBytes(d);
                 var left = Length - bytes.Length;
-                if (left <= 0)
-                    formatter.WriteBytes(bytes.Take((int) Length).ToArray());
-                else
+                if (left > 0)
                 {
                     formatter.WriteBytes(bytes);
                     formatter.WriteBytes(new byte[left]);
+                }
+                else
+                {
+                    formatter.WriteBytes(bytes.Take((int) Length).ToArray());
                 }
             }
         }
 
         public override void ValueFromConst(Parser.ValueType val)
         {
-            if (val.TypeHint == Parser.ConstType.String)
+            switch (val.TypeHint)
             {
-                var uvalue = ProtocolFormatter.UnescapeStringValue(val.StringValue);
-                Data = new[] { uvalue };
+                case Parser.ConstType.String:
+                {
+                    var uvalue = ProtocolFormatter.UnescapeStringValue(val.StringValue);
+                    Data = new[] {uvalue};
+                    break;
+                }
+                default:
+                    Data = new[] {val.StringValue};
+                    break;
             }
-            else
-                Data = new[] { val.StringValue };
         }
+
         public override void ValueFromParam(ClickHouseParameter parameter)
         {
-                Data = new[] { parameter.Value?.ToString() };
+            Data = new[] {parameter.Value?.ToString()};
         }
 
         public override object Value(int currentRow)

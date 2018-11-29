@@ -1,8 +1,8 @@
-﻿using System;
-
-namespace ClickHouse.Ado.Impl.Settings
+﻿namespace ClickHouse.Ado.Impl.Settings
 {
-    internal class UInt64SettingValue:SettingValue
+    using System;
+
+    internal class UInt64SettingValue : SettingValue
     {
         public UInt64SettingValue(ulong value)
         {
@@ -18,8 +18,12 @@ namespace ClickHouse.Ado.Impl.Settings
 
         internal override T As<T>()
         {
-            if (typeof(T) != typeof(ulong)) throw new InvalidCastException();
-            return (T)(object)Value;
+            if (typeof(T) != typeof(ulong))
+            {
+                throw new InvalidCastException();
+            }
+
+            return (T) (object) Value;
         }
 
         internal override object AsValue()

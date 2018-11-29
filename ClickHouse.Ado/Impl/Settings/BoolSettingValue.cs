@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace ClickHouse.Ado.Impl.Settings
+﻿namespace ClickHouse.Ado.Impl.Settings
 {
+    using System;
+
     internal class BoolSettingValue : SettingValue
     {
         public BoolSettingValue(bool value)
@@ -18,7 +18,11 @@ namespace ClickHouse.Ado.Impl.Settings
 
         internal override T As<T>()
         {
-            if(typeof(T)!=typeof(bool))throw new InvalidCastException();
+            if (typeof(T) != typeof(bool))
+            {
+                throw new InvalidCastException();
+            }
+
             return (T) (object) Value;
         }
 

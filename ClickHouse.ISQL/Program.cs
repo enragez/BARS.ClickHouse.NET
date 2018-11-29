@@ -1,116 +1,160 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ClickHouse.Ado;
-
-namespace ClickHouse.Isql
+﻿namespace ClickHouse.Isql
 {
-    class Program
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using Ado;
+
+    internal class Program
     {
-        static int Help(string err=null)
+        private static int Help(string err = null)
         {
-            if(err!=null)
-                Console.Error.WriteLine("Error: {0}",err);
-            Console.Error.WriteLine("Usage: clickhouse.isql [-host <hostname>] [-port <port>] [-user <username>] [-pass <password>] [-db <database>] [-output {TSV|TSVWithHeader|XML}] [-coalesce <coalescing value>] <query>");
+            if (err != null)
+            {
+                Console.Error.WriteLine("Error: {0}", err);
+            }
+
+            Console.Error
+                   .WriteLine("Usage: clickhouse.isql [-host <hostname>] [-port <port>] [-user <username>] [-pass <password>] [-db <database>] [-output {TSV|TSVWithHeader|XML}] [-coalesce <coalescing value>] <query>");
             return -1;
         }
-        static int Main(string[] args)
+
+        private static int Main(string[] args)
         {
-            string host = "localhost", user = "", pass = "", query = null, db="default";
+            string host = "192.168.228.116",
+                   user = "default",
+                   pass = "123",
+                   query = "select 1",
+                   db = "default";
             string coalesce = null;
-            int port = 9000;
-            var formatters=new Dictionary<OutputFormat,Func<Stream,Outputter>>
-            {
-                {OutputFormat.TSV, s=>new TsvOutputter(s) },
-                {OutputFormat.TSVWithHeader, s=>new TsvWithHeaderOutputter(s) },
-                {OutputFormat.XML, s=>new XmlOutputter(s) },
-            };
-            OutputFormat format=OutputFormat.TSV;
+            var port = 8123;
+            var formatters = new Dictionary<OutputFormat, Func<Stream, Outputter>>
+                             {
+                                 {OutputFormat.TSV, s => new TsvOutputter(s)},
+                                 {OutputFormat.TSVWithHeader, s => new TsvWithHeaderOutputter(s)},
+                                 {OutputFormat.XML, s => new XmlOutputter(s)}
+                             };
+            var format = OutputFormat.TSV;
             for (var i = 0; i < args.Length; i++)
             {
                 if (!args[i].StartsWith("-") && !args[i].StartsWith("/"))
+                {
                     query = args[i];
+                }
                 else
+                {
                     switch (args[i].TrimStart('-', '/').ToLower())
                     {
                         case "h":
                         case "host":
                             if (i == args.Length - 1)
+                            {
                                 return Help("Missing host parameter value.");
+                            }
+
                             host = args[++i];
                             break;
                         case "p":
                         case "port":
                             if (i == args.Length - 1)
+                            {
                                 return Help("Missing port parameter value.");
+                            }
+
                             port = int.Parse(args[++i]);
                             break;
                         case "u":
                         case "user":
                             if (i == args.Length - 1)
+                            {
                                 return Help("Missing user parameter value.");
+                            }
+
                             user = args[++i];
                             break;
                         case "pass":
                         case "password":
                             if (i == args.Length - 1)
+                            {
                                 return Help("Missing password parameter value.");
+                            }
+
                             pass = args[++i];
                             break;
                         case "d":
                         case "db":
                             if (i == args.Length - 1)
+                            {
                                 return Help("Missing db parameter value.");
+                            }
+
                             db = args[++i];
                             break;
                         case "f":
                         case "format":
                             if (i == args.Length - 1)
+                            {
                                 return Help("Missing format parameter value.");
-                            format = (OutputFormat)Enum.Parse(typeof(OutputFormat),args[++i],true);
+                            }
+
+                            format = (OutputFormat) Enum.Parse(typeof(OutputFormat), args[++i], true);
                             break;
                         case "c":
                         case "coalesce":
                             if (i == args.Length - 1)
+                            {
                                 return Help("Missing coalesce parameter value.");
+                            }
+
                             coalesce = args[++i];
                             break;
                     }
+                }
             }
+
             if (string.IsNullOrWhiteSpace(query))
+            {
                 return Help("Missing query to execute");
+            }
+
             var formatter = formatters[format](Console.OpenStandardOutput());
             formatter.Start();
-            using (var cnn = new ClickHouseConnection($"Host={host};Port={port};User={user};Password={pass};Database={db}"))
+            using (var cnn =
+                new ClickHouseConnection($"Host={host};Port={port};User={user};Password={pass};Database={db}"))
             {
                 cnn.Open();
-                bool hasOutput = false;
+                var hasOutput = false;
                 using (var cmd = cnn.CreateCommand(query))
-                using (var reader = cmd.ExecuteReader())
                 {
-                    do
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        formatter.ResultStart();
-                        for (var i = 0; i < reader.FieldCount; i++)
-                            formatter.HeaderCell(reader.GetName(i));
-                        formatter.DataStart();
-                        while (reader.Read())
+                        do
                         {
-                            formatter.RowStart();
+                            formatter.ResultStart();
                             for (var i = 0; i < reader.FieldCount; i++)
                             {
-                                formatter.ValueCell(reader.GetValue(i));
-                                hasOutput = true;
+                                formatter.HeaderCell(reader.GetName(i));
                             }
-                            formatter.RowEnd();
-                        }
-                        formatter.ResultEnd();
-                    } while (reader.NextResult());
+
+                            formatter.DataStart();
+                            while (reader.Read())
+                            {
+                                formatter.RowStart();
+                                for (var i = 0; i < reader.FieldCount; i++)
+                                {
+                                    formatter.ValueCell(reader.GetValue(i));
+                                    hasOutput = true;
+                                }
+
+                                formatter.RowEnd();
+                            }
+
+                            formatter.ResultEnd();
+                        } while (reader.NextResult());
+                    }
                 }
-                if (!hasOutput && coalesce!=null)
+
+                if (!hasOutput && coalesce != null)
                 {
                     formatter.ResultStart();
                     formatter.HeaderCell("NULL");
@@ -121,6 +165,7 @@ namespace ClickHouse.Isql
                     formatter.ResultEnd();
                 }
             }
+
             formatter.End();
             return 0;
         }
