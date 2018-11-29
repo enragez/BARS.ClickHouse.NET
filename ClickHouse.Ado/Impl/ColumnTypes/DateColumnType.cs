@@ -8,7 +8,6 @@ using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using ClickHouse.Ado.Impl.ATG.Insert;
 using Buffer = System.Buffer;
 
@@ -31,11 +30,7 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
 
         internal override void Read(ProtocolFormatter formatter, int rows)
         {
-#if FRAMEWORK20 || FRAMEWORK40 || FRAMEWORK45
             var itemSize = sizeof(ushort);
-#else
-            var itemSize = Marshal.SizeOf<ushort>();
-#endif
             var bytes = formatter.ReadBytes(itemSize * rows);
             var xdata = new ushort[rows];
             Buffer.BlockCopy(bytes, 0, xdata, 0, itemSize * rows);
@@ -68,11 +63,8 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
 
         public override void ValueFromParam(ClickHouseParameter parameter)
         {
-            if (parameter.DbType == DbType.Date || parameter.DbType == DbType.DateTime
-#if !NETCOREAPP11
-                                                || parameter.DbType == DbType.DateTime2 || parameter.DbType == DbType.DateTimeOffset
-#endif
-            )
+            if (parameter.DbType == DbType.Date || parameter.DbType == DbType.DateTime || 
+                parameter.DbType == DbType.DateTime2 || parameter.DbType == DbType.DateTimeOffset)
             {
                 Data = new[] {(DateTime) Convert.ChangeType(parameter.Value, typeof(DateTime))};
             }

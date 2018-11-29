@@ -27,11 +27,7 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
 
         internal override void Read(ProtocolFormatter formatter, int rows)
         {
-#if FRAMEWORK20 || FRAMEWORK40 || FRAMEWORK45
             var itemSize = sizeof(uint);
-#else
-            var itemSize = Marshal.SizeOf<uint>();
-#endif
             var bytes = formatter.ReadBytes(itemSize * rows);
             var xdata = new uint[rows];
             Buffer.BlockCopy(bytes, 0, xdata, 0, itemSize * rows);
@@ -61,13 +57,17 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
         }
         public override void ValueFromParam(ClickHouseParameter parameter)
         {
-            if (parameter.DbType == DbType.Date || parameter.DbType == DbType.DateTime
-#if !NETCOREAPP11
-                || parameter.DbType == DbType.DateTime2 || parameter.DbType == DbType.DateTimeOffset
-#endif
-                )
-                Data = new[] { (DateTime)Convert.ChangeType(parameter.Value, typeof(DateTime)) };
-            else throw new InvalidCastException($"Cannot convert parameter with type {parameter.DbType} to DateTime.");
+            switch (parameter.DbType)
+            {
+                case DbType.Date:
+                case DbType.DateTime:
+                case DbType.DateTime2:
+                case DbType.DateTimeOffset:
+                    Data = new[] { (DateTime)Convert.ChangeType(parameter.Value, typeof(DateTime)) };
+                    break;
+                default:
+                    throw new InvalidCastException($"Cannot convert parameter with type {parameter.DbType} to DateTime.");
+            }
         }
 
     }

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ClickHouse.Ado</RootNamespace>
     <AssemblyName>ClickHouse.Ado</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -32,8 +32,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LZ4, Version=1.0.10.93, Culture=neutral, PublicKeyToken=62e1b5ec1eec9bdd, processorArchitecture=MSIL">
-      <HintPath>..\packages\lz4net.1.0.10.93\lib\net4-client\LZ4.dll</HintPath>
+    <Reference Include="LZ4, Version=1.0.15.93, Culture=neutral, PublicKeyToken=62e1b5ec1eec9bdd">
+      <HintPath>..\packages\lz4net.1.0.15.93\lib\net4-client\LZ4.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -55,6 +55,7 @@
     <Compile Include="Impl\ATG\IdentList\Scanner.cs" />
     <Compile Include="Impl\ATG\Enums\Parser.cs" />
     <Compile Include="Impl\ATG\Enums\Scanner.cs" />
+    <Compile Include="Impl\Compress\ChunkedStream.cs" />
     <Compile Include="Impl\Data\Block.cs" />
     <Compile Include="Impl\Data\BlockInfo.cs" />
     <Compile Include="Impl\Settings\BoolSettingValue.cs" />
