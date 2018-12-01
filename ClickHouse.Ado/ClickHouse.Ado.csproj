@@ -49,6 +49,7 @@
     <Compile Include="ClickHouseDataReader.cs" />
     <Compile Include="ClickHouseParameter.cs" />
     <Compile Include="ClickHouseParameterCollection.cs" />
+    <Compile Include="ClickHouseTransaction.cs" />
     <Compile Include="Impl\ATG\Insert\Parser.cs" />
     <Compile Include="Impl\ATG\Insert\Scanner.cs" />
     <Compile Include="Impl\ATG\IdentList\Parser.cs" />

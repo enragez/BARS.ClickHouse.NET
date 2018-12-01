@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
     using System.Text;
@@ -89,7 +90,21 @@
 
         public override void ValuesFromConst(IEnumerable objects)
         {
-            Data = objects.Cast<string>().ToArray();
+            var data = new List<string>();
+
+            foreach (var val in objects)
+            {
+                if (val is Guid)
+                {
+                    data.Add(val.ToString());
+                }
+                else
+                {
+                    data.Add((string)val);
+                }
+            }
+            
+            Data = data.ToArray();
         }
     }
 }

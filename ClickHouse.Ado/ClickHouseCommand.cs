@@ -192,7 +192,11 @@
                         var val = valueList[i];
                         if (val.TypeHint == Parser.ConstType.Parameter)
                         {
-                            schema.Columns[i].Type.ValueFromParam(Parameters[val.StringValue]);
+                            var param = Parameters.Contains(val.StringValue)
+                                               ? Parameters[val.StringValue]
+                                               : Parameters[$"@{val.StringValue}"];
+                            
+                            schema.Columns[i].Type.ValueFromParam(param);
                         }
                         else
                         {

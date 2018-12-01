@@ -14,8 +14,8 @@
                 Console.Error.WriteLine("Error: {0}", err);
             }
 
-            Console.Error
-                   .WriteLine("Usage: clickhouse.isql [-host <hostname>] [-port <port>] [-user <username>] [-pass <password>] [-db <database>] [-output {TSV|TSVWithHeader|XML}] [-coalesce <coalescing value>] <query>");
+            Console.Error.WriteLine("Usage: clickhouse.isql [-host <hostname>] [-port <port>] [-user <username>] [-pass <password>] [-db <database>] [-output {TSV|TSVWithHeader|XML}] [-coalesce <coalescing value>] <query>");
+            Console.In.ReadLine();
             return -1;
         }
 
@@ -26,14 +26,18 @@
                    pass = "123",
                    query = "select 1",
                    db = "default";
+            var port = 9000;
+            
             string coalesce = null;
-            var port = 8123;
+            
+            
             var formatters = new Dictionary<OutputFormat, Func<Stream, Outputter>>
                              {
-                                 {OutputFormat.TSV, s => new TsvOutputter(s)},
-                                 {OutputFormat.TSVWithHeader, s => new TsvWithHeaderOutputter(s)},
-                                 {OutputFormat.XML, s => new XmlOutputter(s)}
+                                 { OutputFormat.TSV, s => new TsvOutputter(s)},
+                                 { OutputFormat.TSVWithHeader, s => new TsvWithHeaderOutputter(s)},
+                                 { OutputFormat.XML, s => new XmlOutputter(s)}
                              };
+            
             var format = OutputFormat.TSV;
             for (var i = 0; i < args.Length; i++)
             {
@@ -119,8 +123,7 @@
 
             var formatter = formatters[format](Console.OpenStandardOutput());
             formatter.Start();
-            using (var cnn =
-                new ClickHouseConnection($"Host={host};Port={port};User={user};Password={pass};Database={db}"))
+            using (var cnn = new ClickHouseConnection($"Host={host};Port={port};User={user};Password={pass};Database={db};Compress=true"))
             {
                 cnn.Open();
                 var hasOutput = false;

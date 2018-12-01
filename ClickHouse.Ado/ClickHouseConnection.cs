@@ -115,12 +115,12 @@
 
         public IDbTransaction BeginTransaction()
         {
-            throw new NotSupportedException();
+            return new ClickHouseTransaction(this);
         }
 
         public IDbTransaction BeginTransaction(IsolationLevel il)
         {
-            throw new NotSupportedException();
+            return new ClickHouseTransaction(this, il);
         }
 
         IDbCommand IDbConnection.CreateCommand()

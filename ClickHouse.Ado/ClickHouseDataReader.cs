@@ -15,8 +15,7 @@
 
         private int _currentRow;
 
-        internal ClickHouseDataReader(ClickHouseConnection clickHouseConnection, CommandBehavior behavior
-        )
+        internal ClickHouseDataReader(ClickHouseConnection clickHouseConnection, CommandBehavior behavior)
         {
             _clickHouseConnection = clickHouseConnection;
             _behavior = behavior;

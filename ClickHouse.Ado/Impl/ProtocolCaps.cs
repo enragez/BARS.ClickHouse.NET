@@ -16,6 +16,6 @@
 
         internal const int DbmsTcpProtocolVersion = 54060;
 
-        internal const string ClientName = "ClickHouse .NET client library";
+        internal const string ClientName = "BARS.ClickHouse.Client";
     }
 }
