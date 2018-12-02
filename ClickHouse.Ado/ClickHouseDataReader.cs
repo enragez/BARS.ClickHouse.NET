@@ -11,7 +11,7 @@
 
         private ClickHouseConnection _clickHouseConnection;
 
-        private Block _currentBlock;
+        internal Block Current { get; private set; }
 
         private int _currentRow;
 
@@ -29,50 +29,50 @@
 
         public string GetName(int i)
         {
-            return _currentBlock.Columns[i].Name;
+            return Current.Columns[i].Name;
         }
 
         public string GetDataTypeName(int i)
         {
-            if (_currentBlock == null)
+            if (Current == null)
             {
                 throw new InvalidOperationException("Trying to read beyond end of stream.");
             }
 
-            return _currentBlock.Columns[i].Type.AsClickHouseType();
+            return Current.Columns[i].Type.AsClickHouseType();
         }
 
         public Type GetFieldType(int i)
         {
-            if (_currentBlock == null)
+            if (Current == null)
             {
                 throw new InvalidOperationException("Trying to read beyond end of stream.");
             }
 
-            return _currentBlock.Columns[i].Type.CLRType;
+            return Current.Columns[i].Type.CLRType;
         }
 
         public object GetValue(int i)
         {
-            if (_currentBlock == null || _currentBlock.Rows <= _currentRow || i < 0 || i >= FieldCount)
+            if (Current == null || Current.Rows <= _currentRow || i < 0 || i >= FieldCount)
             {
                 throw new InvalidOperationException("Trying to read beyond end of stream.");
             }
 
-            return _currentBlock.Columns[i].Type.Value(_currentRow);
+            return Current.Columns[i].Type.Value(_currentRow);
         }
 
         public int GetValues(object[] values)
         {
-            if (_currentBlock == null || _currentBlock.Rows <= _currentRow)
+            if (Current == null || Current.Rows <= _currentRow)
             {
                 throw new InvalidOperationException("Trying to read beyond end of stream.");
             }
 
-            var n = Math.Max(values.Length, _currentBlock.Columns.Count);
+            var n = Math.Max(values.Length, Current.Columns.Count);
             for (var i = 0; i < n; i++)
             {
-                values[i] = _currentBlock.Columns[i].Type.Value(_currentRow);
+                values[i] = Current.Columns[i].Type.Value(_currentRow);
             }
 
             return n;
@@ -80,12 +80,12 @@
 
         public int GetOrdinal(string name)
         {
-            if (_currentBlock == null || _currentBlock.Rows <= _currentRow)
+            if (Current == null || Current.Rows <= _currentRow)
             {
                 throw new InvalidOperationException("Trying to read beyond end of stream.");
             }
 
-            return _currentBlock.Columns.FindIndex(x => x.Name == name);
+            return Current.Columns.FindIndex(x => x.Name == name);
         }
 
         public bool GetBoolean(int i)
@@ -130,12 +130,12 @@
 
         public long GetInt64(int i)
         {
-            if (_currentBlock == null || _currentBlock.Rows <= _currentRow || i < 0 || i >= FieldCount)
+            if (Current == null || Current.Rows <= _currentRow || i < 0 || i >= FieldCount)
             {
                 throw new InvalidOperationException("Trying to read beyond end of stream.");
             }
 
-            return _currentBlock.Columns[i].Type.IntValue(_currentRow);
+            return Current.Columns[i].Type.IntValue(_currentRow);
         }
 
         public float GetFloat(int i)
@@ -174,12 +174,12 @@
 
         public bool IsDBNull(int i)
         {
-            if (_currentBlock == null)
+            if (Current == null)
             {
                 throw new InvalidOperationException("Trying to read beyond end of stream.");
             }
 
-            if (_currentBlock.Columns[i].Type is NullableColumnType type)
+            if (Current.Columns[i].Type is NullableColumnType type)
             {
                 return type.IsNull(_currentRow);
             }
@@ -187,12 +187,12 @@
             return false;
         }
 
-        public int FieldCount => _currentBlock.Columns.Count;
+        public int FieldCount => Current.Columns.Count;
 
 
         public void Close()
         {
-            if (_currentBlock != null)
+            if (Current != null)
             {
                 _clickHouseConnection.Formatter.ReadResponse();
             }
@@ -213,24 +213,24 @@
         public bool NextResult()
         {
             _currentRow = -1;
-            return (_currentBlock = _clickHouseConnection.Formatter.ReadBlock()) != null;
+            return (Current = _clickHouseConnection.Formatter.ReadBlock()) != null;
         }
 
         public bool Read()
         {
-            if (_currentBlock == null)
+            if (Current == null)
             {
                 throw new InvalidOperationException("Trying to read beyond end of stream.");
             }
 
             _currentRow++;
-            return _currentBlock.Rows > _currentRow;
+            return Current.Rows > _currentRow;
         }
 
         public int Depth { get; } = 1;
 
         public bool IsClosed => _clickHouseConnection == null;
 
-        public int RecordsAffected => _currentBlock.Rows;
+        public int RecordsAffected => Current.Rows;
     }
 }

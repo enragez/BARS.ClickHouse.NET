@@ -47,6 +47,7 @@
     <Compile Include="ClickHouseConnection.cs" />
     <Compile Include="ClickHouseConnectionSettings.cs" />
     <Compile Include="ClickHouseDataReader.cs" />
+    <Compile Include="ClickHouseInMemoryReader.cs" />
     <Compile Include="ClickHouseParameter.cs" />
     <Compile Include="ClickHouseParameterCollection.cs" />
     <Compile Include="ClickHouseTransaction.cs" />
