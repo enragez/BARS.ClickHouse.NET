@@ -27,7 +27,8 @@
                                                                      {"Date", typeof(DateColumnType)},
                                                                      {"DateTime", typeof(DateTimeColumnType)},
                                                                      {"String", typeof(StringColumnType)},
-                                                                     {"Null", typeof(NullColumnType)}
+                                                                     {"Null", typeof(NullColumnType)},
+                                                                     {"UUID", typeof(GuidColumnType)}
                                                                  };
 
         private static readonly Regex FixedStringRegex =
