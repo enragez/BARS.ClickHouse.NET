@@ -20,7 +20,7 @@ namespace BARS.ClickHouse.Ado
 
             _currentRowIndex = -1;
         }
-        
+
         public void Dispose()
         {
         }

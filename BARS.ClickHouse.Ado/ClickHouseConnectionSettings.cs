@@ -121,17 +121,17 @@
 
         public bool Async { get; private set; }
 
-        public int BufferSize { get; } = 4096;
+        public int BufferSize { get; private set; } = 4096;
 
         public int ApacheBufferSize { get; private set; }
 
-        public int SocketTimeout { get; } = 1000;
+        public int SocketTimeout { get; private set; } = 1000;
 
-        public int ConnectionTimeout { get; } = 1000;
+        public int ConnectionTimeout { get; private set; } = 1000;
+ 
+        public int DataTransferTimeout { get; private set; } = 1000;
 
-        public int DataTransferTimeout { get; } = 1000;
-
-        public int KeepAliveTimeout { get; } = 1000;
+        public int KeepAliveTimeout { get; private set; } = 1000;
 
         public int TimeToLiveMillis { get; private set; }
 
@@ -161,7 +161,7 @@
 
         public string Compressor { get; private set; }
 
-        public bool CheckCompressedHash { get; } = true;
+        public bool CheckCompressedHash { get; private set; } = true;
 
         public bool Decompress { get; private set; }
 

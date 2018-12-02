@@ -109,6 +109,10 @@
             }
         }
 
+        public string CommandText { get; set; }
+
+        public int CommandTimeout { get; set; }
+
         /// <summary> Read all data to memory and return in memory reader </summary>
         /// <returns> In memory data reader </returns>
         public IDataReader ReadAllToMemory()
@@ -116,16 +120,12 @@
             using (var reader = ExecuteReader())
             {
                 var data = new List<List<ColumnInfo>>();
-                
+
                 reader.ReadAll(r => { data.Add(((ClickHouseDataReader) r).Current.Columns); });
-                
+
                 return new ClickHouseInMemoryReader(data);
             }
         }
-
-        public string CommandText { get; set; }
-
-        public int CommandTimeout { get; set; }
 
         public ClickHouseParameter CreateParameter()
         {
@@ -207,9 +207,9 @@
                         if (val.TypeHint == Parser.ConstType.Parameter)
                         {
                             var param = Parameters.Contains(val.StringValue)
-                                               ? Parameters[val.StringValue]
-                                               : Parameters[$"@{val.StringValue}"];
-                            
+                                            ? Parameters[val.StringValue]
+                                            : Parameters[$"@{val.StringValue}"];
+
                             schema.Columns[i].Type.ValueFromParam(param);
                         }
                         else

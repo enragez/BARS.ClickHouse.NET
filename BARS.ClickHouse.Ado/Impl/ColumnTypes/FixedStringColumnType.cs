@@ -100,10 +100,10 @@
                 }
                 else
                 {
-                    data.Add((string)val);
+                    data.Add((string) val);
                 }
             }
-            
+
             Data = data.ToArray();
         }
     }

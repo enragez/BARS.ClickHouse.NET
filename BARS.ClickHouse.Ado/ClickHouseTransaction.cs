@@ -18,10 +18,9 @@ namespace BARS.ClickHouse.Ado
         {
             IsolationLevel = level;
         }
-        
+
         public void Dispose()
         {
-            
         }
 
         public void Commit()
@@ -33,7 +32,7 @@ namespace BARS.ClickHouse.Ado
         }
 
         public IDbConnection Connection { get; }
-        
+
         public IsolationLevel IsolationLevel { get; }
     }
 }

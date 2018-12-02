@@ -11,8 +11,6 @@
 
         private ClickHouseConnection _clickHouseConnection;
 
-        internal Block Current { get; private set; }
-
         private int _currentRow;
 
         internal ClickHouseDataReader(ClickHouseConnection clickHouseConnection, CommandBehavior behavior)
@@ -21,6 +19,8 @@
             _behavior = behavior;
             NextResult();
         }
+
+        internal Block Current { get; private set; }
 
         public void Dispose()
         {
