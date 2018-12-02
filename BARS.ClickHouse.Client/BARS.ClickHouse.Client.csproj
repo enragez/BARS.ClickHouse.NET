@@ -55,9 +55,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClickHouse.Ado\ClickHouse.Ado.csproj">
+    <ProjectReference Include="..\BARS.ClickHouse.Ado\BARS.ClickHouse.Ado.csproj">
       <Project>{28629cf3-7958-48bf-bd52-a4314c762f9f}</Project>
-      <Name>ClickHouse.Ado</Name>
+      <Name>BARS.ClickHouse.Ado</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
