@@ -9,25 +9,54 @@
     public class SimpleTests
     {
         [Test]
-        public void ShouldConvertIntoConnectionStringAndBack()
+        public void DecimalParam()
         {
-            const string connectionString =
-                "Compress=True;CheckCompressedHash=False;Compressor=lz4;Host=192.168.228.116;Port=9000;User=default;Password=123;SocketTimeout=600000;Database=tests;";
-            var expectedSettings = new ClickHouseConnectionSettings(connectionString);
-            var actualSettings = new ClickHouseConnectionSettings(expectedSettings.ToString());
-
-            Assert.AreEqual(expectedSettings.BufferSize, actualSettings.BufferSize);
-            Assert.AreEqual(expectedSettings.SocketTimeout, actualSettings.SocketTimeout);
-            Assert.AreEqual(expectedSettings.Host, actualSettings.Host);
-            Assert.AreEqual(expectedSettings.Port, actualSettings.Port);
-            Assert.AreEqual(expectedSettings.Database, actualSettings.Database);
-            Assert.AreEqual(expectedSettings.Compress, actualSettings.Compress);
-            Assert.AreEqual(expectedSettings.Compressor, actualSettings.Compressor);
-            Assert.AreEqual(expectedSettings.CheckCompressedHash, actualSettings.CheckCompressedHash);
-            Assert.AreEqual(expectedSettings.User, actualSettings.User);
-            Assert.AreEqual(expectedSettings.Password, actualSettings.Password);
+            using (var cnn = TestHelper.GetConnection())
+            {
+                var cmd = cnn.CreateCommand("insert into decimal_test  (date, dec1, dec2, dec3) values('1970-01-01',@d,@d,@d)");
+                cmd.AddParameter("d", DbType.Decimal, 666m);
+                cmd.ExecuteNonQuery();
+                
+                cmd = cnn.CreateCommand("insert into decimal_test (date, dec1, dec2, dec3) values('1970-01-01',@d,@d,@d)");
+                cmd.AddParameter("d", DbType.Decimal, -666m);
+                cmd.ExecuteNonQuery();
+            }
         }
-        
+
+        [Test]
+        public void InsertAndSelectEquals()
+        {
+            using (var cnn = TestHelper.GetConnection())
+            {
+                var date = new DateTime(2018, 12, 2);
+
+                var dateString = date.ToString("yyyy-MM-dd");
+
+                cnn.CreateCommand($"INSERT INTO test_data (date, user_id) VALUES ('{dateString}', 228)")
+                .ExecuteNonQuery();
+
+                var dateResult = (DateTime) cnn.CreateCommand("SELECT date FROM test_data WHERE user_id = 228")
+                                            .ExecuteScalar();
+
+                Assert.AreEqual(date, dateResult);
+            }
+        }
+
+        [Test]
+        public void SelectDecimal()
+        {
+            using (var cnn = TestHelper.GetConnection())
+            {
+                using (var cmd = cnn.CreateCommand("SELECT date, dec1, dec2 ,dec3 FROM decimal_test"))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        TestHelper.PrintData(reader);
+                    }
+                }
+            }
+        }
+
         [Test]
         public void SelectFromArray()
         {
@@ -57,20 +86,23 @@
         }
 
         [Test]
-        public void InsertAndSelectEquals()
+        public void ShouldConvertIntoConnectionStringAndBack()
         {
-            using (var cnn = TestHelper.GetConnection())
-            {
-                var date = new DateTime(2018, 12, 2);
-                
-                var dateString = date.ToString("yyyy-MM-dd");
-                
-                cnn.CreateCommand($"INSERT INTO test_data (date, user_id) VALUES ('{dateString}', 228)").ExecuteNonQuery();
+            const string connectionString =
+                "Compress=True;CheckCompressedHash=False;Compressor=lz4;Host=192.168.228.116;Port=9000;User=default;Password=123;SocketTimeout=600000;Database=tests;";
+            var expectedSettings = new ClickHouseConnectionSettings(connectionString);
+            var actualSettings = new ClickHouseConnectionSettings(expectedSettings.ToString());
 
-                var dateResult = (DateTime)cnn.CreateCommand("SELECT date FROM test_data WHERE user_id = 228").ExecuteScalar();
-                
-                Assert.AreEqual(date, dateResult);
-            }
+            Assert.AreEqual(expectedSettings.BufferSize, actualSettings.BufferSize);
+            Assert.AreEqual(expectedSettings.SocketTimeout, actualSettings.SocketTimeout);
+            Assert.AreEqual(expectedSettings.Host, actualSettings.Host);
+            Assert.AreEqual(expectedSettings.Port, actualSettings.Port);
+            Assert.AreEqual(expectedSettings.Database, actualSettings.Database);
+            Assert.AreEqual(expectedSettings.Compress, actualSettings.Compress);
+            Assert.AreEqual(expectedSettings.Compressor, actualSettings.Compressor);
+            Assert.AreEqual(expectedSettings.CheckCompressedHash, actualSettings.CheckCompressedHash);
+            Assert.AreEqual(expectedSettings.User, actualSettings.User);
+            Assert.AreEqual(expectedSettings.Password, actualSettings.Password);
         }
 
         [Test]

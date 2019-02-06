@@ -93,6 +93,7 @@
 
         public object ExecuteScalar()
         {
+            object result = null;
             using (var reader = ExecuteReader())
             {
                 do
@@ -102,11 +103,11 @@
                         continue;
                     }
 
-                    return reader.GetValue(0);
+                    result = reader.GetValue(0);
                 } while (reader.NextResult());
-
-                return null;
             }
+            
+            return result;
         }
 
         public string CommandText { get; set; }

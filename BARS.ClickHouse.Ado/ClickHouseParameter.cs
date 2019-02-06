@@ -34,6 +34,11 @@
                 DbType == DbType.StringFixedLength || DbType == DbType.AnsiStringFixedLength ||
                 DbType == 0 && val is string)
             {
+                if (!(val is string) && val is IEnumerable)
+                {
+                    return string.Join(",", ((IEnumerable) val).Cast<object>().Select(AsSubstitute));
+                }
+                
                 return ProtocolFormatter.EscapeStringValue(val.ToString());
             }
 

@@ -45,6 +45,14 @@ namespace BARS.ClickHouse.Tests
                                        email String
                                      ) ENGINE = MergeTree(date, email, 8192)")
                     .ExecuteNonQuery();
+
+                conn.CreateCommand(@"CREATE TABLE IF NOT EXISTS decimal_test
+                                      (
+                                        date Date,
+                                        dec1 Decimal(28, 2),
+                                        dec2 Decimal(28, 2),
+                                        dec3 Decimal(28, 2)
+                                      ) ENGINE = MergeTree(date, dec1, 8192)");
             }
         }
     }
